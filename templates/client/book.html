@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% block title %}Онлайн-запись — Студия красоты «Нежность»{% endblock %}
+
+{% block extra_head %}
+<style>
+.booking-section { margin-bottom: 2rem; }
+.booking-section-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--pink-dark);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--pink-border);
+}
+
+/* Category label */
+.cat-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pink-dark);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+
+/* Service select — chips */
+.service-select-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.service-chip {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--pink-border);
+    border-radius: 20px;
+    background: white;
+    color: #5a5a5a;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+.service-chip:hover { border-color: var(--pink-accent); color: var(--pink-primary); }
+.service-chip.selected { border-color: var(--pink-primary); background: var(--pink-primary); color: white; font-weight: 600; }
+.service-chip .price { font-size: 0.8rem; opacity: 0.8; }
+
+/* Master cards */
+.master-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+.master-card {
+    border: 2px solid var(--pink-border);
+    border-radius: 14px;
+    background: white;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+.master-card:hover { border-color: var(--pink-accent); box-shadow: 0 4px 16px rgba(233,30,140,0.1); }
+.master-card.selected { border-color: var(--pink-primary); background: var(--pink-lightest); }
+.master-card .master-photo {
+    width: 96px; height: 96px; border-radius: 50%;
+    margin: 0 auto 0.8rem;
+    overflow: hidden;
+    border: 3px solid var(--pink-light);
+    background: linear-gradient(135deg, var(--pink-light), var(--pink-accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; color: white; font-weight: 700;
+}
+.master-card .master-photo img { width: 100%; height: 100%; object-fit: cover; }
+.master-card .master-name { font-weight: 700; font-size: 0.9rem; color: var(--pink-dark); margin-bottom: 0.2rem; }
+.master-card .master-spec { font-size: 0.78rem; color: #888; }
+
+/* Day picker */
+.day-picker { display: flex; gap: 0.5rem; align-items: center; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.25rem; }
+.day-tile {
+    min-width: 62px;
+    border: 2px solid var(--pink-border);
+    border-radius: 12px;
+    background: white;
+    padding: 0.5rem 0.3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.day-tile:hover { border-color: var(--pink-accent); }
+.day-tile.selected { border-color: var(--pink-primary); background: var(--pink-primary); color: white; }
+.day-tile .day-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.day-tile .day-num { font-size: 1.3rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+.day-tile .day-month { font-size: 0.7rem; }
+.day-tile.today { border-color: var(--pink-accent); }
+
+.btn-other-day {
+    min-width: 90px;
+    border: 2px dashed var(--pink-border);
+    border-radius: 12px;
+    background: white;
+    color: var(--pink-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    text-align: center;
+}
+.btn-other-day:hover { border-color: var(--pink-primary); background: var(--pink-lightest); }
+
+/* Slots */
+.slots-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.slot-btn {
+    border: 2px solid var(--pink-accent);
+    background: white;
+    color: var(--pink-dark);
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+.slot-btn:hover, .slot-btn.selected {
+    background: var(--pink-primary); border-color: var(--pink-primary); color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-calendar-plus me-2" style="color: var(--pink-primary);"></i>Онлайн-запись</h1>
+        <p class="text-muted mb-0">Выберите услугу, мастера и удобное время</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post" id="booking-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger rounded-3 mb-4">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- GUEST CONTACT INFO (shown only when not logged in) -->
+                {% if is_guest %}
+                <div class="card p-4 booking-section" style="border-color: var(--pink-accent);">
+                    <div class="booking-section-title"><i class="bi bi-person me-2"></i>Ваши данные</div>
+                    <p class="text-muted small mb-3">Введите имя и телефон — мы свяжемся с вами для подтверждения записи. <a href="/login/" class="text-decoration-none" style="color:var(--pink-primary);">Войти</a> или <a href="/register/" class="text-decoration-none" style="color:var(--pink-primary);">создать аккаунт</a>.</p>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Как вас зовут? <span class="text-danger">*</span></label>
+                            <input type="text" name="guest_name" class="form-control {% if guest_errors.guest_name %}is-invalid{% endif %}"
+                                   placeholder="Имя" value="{{ guest_name_val }}">
+                            {% if guest_errors.guest_name %}
+                            <div class="invalid-feedback">{{ guest_errors.guest_name }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Номер телефона <span class="text-danger">*</span></label>
+                            <input type="tel" name="guest_phone" class="form-control {% if guest_errors.guest_phone %}is-invalid{% endif %}"
+                                   placeholder="+7 (999) 000-00-00" value="{{ guest_phone_val }}">
+                            {% if guest_errors.guest_phone %}
+                            <div class="invalid-feedback">{{ guest_errors.guest_phone }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- STEP 1: Service chips grouped by category -->
+                <div class="card p-4 booking-section">
+                    <div class="booking-section-title"><i class="bi bi-scissors me-2"></i>Шаг 1 — Выберите услугу</div>
+                    {% for cat in services_by_category %}
+                    <div class="mb-3">
+                        <div class="cat-label">{{ cat.label }}</div>
+                        <div class="service-select-grid">
+                            {% for service in cat.services %}
+                            <div class="service-chip {% if selected_service_id == service.pk|stringformat:'s' %}selected{% endif %}"
+                                 onclick="selectService({{ service.pk }}, this)">
+                                <div>{{ service.name }}</div>
+                                <div class="price">{{ service.price }} ₽ · {{ service.duration_minutes }} мин</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <input type="hidden" name="service" id="id_service" value="{{ selected_service_id|default:'' }}">
+                    {% if form.service.errors %}
+                    <div class="text-danger small mt-2">{{ form.service.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- STEP 2: Master cards (loaded via HTMX) -->
+                <div class="card p-4 booking-section" id="master-section" {% if not selected_service_id %}style="opacity:0.5; pointer-events:none;"{% endif %}>
+                    <div class="booking-section-title"><i class="bi bi-person-heart me-2"></i>Шаг 2 — Выберите мастера</div>
+                    <div id="masters-container">
+                        {% if initial_masters %}
+                        <div class="master-cards-grid">
+                            {% for master in initial_masters %}
+                            <div class="master-card" onclick="selectMaster({{ master.pk }}, this)">
+                                <div class="master-photo">
+                                    {% if master.photo %}<img src="{{ master.photo.url }}" alt="{{ master.full_name }}">
+                                    {% else %}<span style="font-size:1.8rem;font-weight:700;">{{ master.full_name|slice:":1" }}</span>{% endif %}
+                                </div>
+                                <div class="master-name">{{ master.full_name }}</div>
+                                <div class="master-spec">{{ master.specialization }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% elif selected_service_id %}
+                            <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Мастера для этой услуги не найдены</p>
+                        {% else %}
+                            <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Сначала выберите услугу выше</p>
+                        {% endif %}
+                    </div>
+                    <input type="hidden" name="master" id="id_master" value="{{ form.master.value|default:'' }}">
+                    {% if form.master.errors %}
+                    <div class="text-danger small mt-2">{{ form.master.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- STEP 3: Day picker -->
+                <div class="card p-4 booking-section" id="date-section" {% if not selected_service_id %}style="opacity:0.5; pointer-events:none;"{% endif %}>
+                    <div class="booking-section-title"><i class="bi bi-calendar3 me-2"></i>Шаг 3 — Выберите день</div>
+                    <div class="day-picker" id="day-picker">
+                        {% for day in next_7_days %}
+                        <div class="day-tile {% if forloop.first %}today{% endif %}"
+                             data-date="{{ day|date:'Y-m-d' }}"
+                             onclick="selectDay('{{ day|date:'Y-m-d' }}', this)">
+                            <div class="day-name">{{ day|date:"D"|slice:":2" }}</div>
+                            <div class="day-num">{{ day|date:"d" }}</div>
+                            <div class="day-month">{{ day|date:"M" }}</div>
+                        </div>
+                        {% endfor %}
+                        <div class="btn-other-day" onclick="showDatePicker()">
+                            <i class="bi bi-calendar me-1"></i>Другой день
+                        </div>
+                    </div>
+                    <input type="hidden" name="date" id="id_date" value="{{ form.date.value|default:'' }}">
+                    <input type="date" id="id_date_picker" class="form-control mt-2" style="display:none;" min="{{ today|date:'Y-m-d' }}" onchange="selectCustomDay(this.value)">
+                    {% if form.date.errors %}
+                    <div class="text-danger small mt-2">{{ form.date.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- STEP 4: Time slots (HTMX) -->
+                <div class="card p-4 booking-section" id="slots-section">
+                    <div class="booking-section-title"><i class="bi bi-clock me-2"></i>Шаг 4 — Выберите время</div>
+                    <div id="slots-container"
+                         hx-get="/bookings/slots/"
+                         hx-trigger="slotRefresh"
+                         hx-include="#id_master, #id_service, #id_date"
+                         hx-target="#slots-container"
+                         hx-swap="innerHTML">
+                        <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Выберите мастера и дату для просмотра свободного времени</p>
+                    </div>
+                    <input type="hidden" name="start_time" id="id_start_time" value="{{ form.start_time.value|default:'' }}">
+                    {% if form.start_time.errors %}
+                    <div class="text-danger small mt-2">{{ form.start_time.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Notes -->
+                <div class="card p-4 booking-section">
+                    <div class="booking-section-title"><i class="bi bi-chat-left-text me-2"></i>Пожелания (необязательно)</div>
+                    <textarea name="notes" class="form-control" rows="2"
+                              placeholder="Любые пожелания...">{{ form.notes.value|default:'' }}</textarea>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-pink btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Подтвердить запись
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function loadMasters(serviceId) {
+    const container = document.getElementById('masters-container');
+    container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" style="color:var(--pink-primary);"></div> <span class="text-muted ms-2 small">Загрузка мастеров...</span></div>';
+    fetch('/bookings/masters-by-service/?service=' + serviceId)
+        .then(r => r.text())
+        .then(html => { container.innerHTML = html; })
+        .catch(() => { container.innerHTML = '<p class="text-muted small"><i class="bi bi-exclamation-circle me-1"></i>Ошибка загрузки</p>'; });
+}
+
+function selectService(serviceId, el) {
+    document.querySelectorAll('.service-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('id_service').value = serviceId;
+
+    document.getElementById('master-section').style.opacity = '1';
+    document.getElementById('master-section').style.pointerEvents = 'auto';
+    document.getElementById('date-section').style.opacity = '1';
+    document.getElementById('date-section').style.pointerEvents = 'auto';
+
+    document.getElementById('id_master').value = '';
+    loadMasters(serviceId);
+
+    if (document.getElementById('id_date').value) {
+        htmx.trigger('#slots-container', 'slotRefresh');
+    }
+}
+
+function selectMaster(masterId, el) {
+    document.querySelectorAll('.master-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('id_master').value = masterId;
+
+    // Refresh slots if date also selected
+    if (document.getElementById('id_date').value) {
+        htmx.trigger('#slots-container', 'slotRefresh');
+    }
+}
+
+function selectDay(dateStr, el) {
+    document.querySelectorAll('.day-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('id_date').value = dateStr;
+    document.getElementById('id_date_picker').style.display = 'none';
+
+    // Refresh slots
+    htmx.trigger('#slots-container', 'slotRefresh');
+}
+
+function showDatePicker() {
+    const picker = document.getElementById('id_date_picker');
+    picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectCustomDay(dateStr) {
+    document.querySelectorAll('.day-tile').forEach(t => t.classList.remove('selected'));
+    document.getElementById('id_date').value = dateStr;
+    htmx.trigger('#slots-container', 'slotRefresh');
+}
+
+// Slot selection
+document.body.addEventListener('click', function(e) {
+    const btn = e.target.closest('.slot-btn');
+    if (btn) {
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('id_start_time').value = btn.dataset.time;
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceId = document.getElementById('id_service').value;
+    if (serviceId) {
+        document.getElementById('master-section').style.opacity = '1';
+        document.getElementById('master-section').style.pointerEvents = 'auto';
+        document.getElementById('date-section').style.opacity = '1';
+        document.getElementById('date-section').style.pointerEvents = 'auto';
+        // If server didn't render masters (e.g. no initial_masters), load via fetch
+        const container = document.getElementById('masters-container');
+        if (!container.querySelector('.master-card')) {
+            loadMasters(serviceId);
+        }
+    }
+
+    const dateVal = document.getElementById('id_date').value;
+    if (dateVal) {
+        document.querySelectorAll('.day-tile').forEach(t => {
+            if (t.dataset.date === dateVal) t.classList.add('selected');
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Услуги — Студия красоты «Нежность»{% endblock %}
+
+{% block extra_head %}
+<style>
+.filter-chip {
+    display: inline-block;
+    padding: 0.45rem 1.1rem;
+    border: 2px solid var(--pink-border);
+    border-radius: 20px;
+    background: white;
+    color: #5a5a5a;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.filter-chip:hover { border-color: var(--pink-accent); color: var(--pink-primary); text-decoration: none; }
+.filter-chip.active { border-color: var(--pink-primary); background: var(--pink-primary); color: white; font-weight: 700; }
+
+.svc-card {
+    background: white;
+    border: 1px solid var(--pink-border);
+    border-radius: 18px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.25s, transform 0.25s;
+}
+.svc-card:hover { box-shadow: 0 8px 30px rgba(233,30,140,0.13); transform: translateY(-3px); }
+
+.svc-photo {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+.svc-photo-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(233,30,140,0.25);
+}
+.svc-body { padding: 1.25rem 1.25rem 0.75rem; flex: 1; display: flex; flex-direction: column; }
+.svc-name { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--pink-dark); font-size: 1rem; margin-bottom: 0.3rem; }
+.svc-desc { font-size: 0.85rem; color: #888; flex: 1; margin-bottom: 0.75rem; }
+.svc-footer { padding: 0 1.25rem 1.25rem; }
+.svc-price { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--pink-primary); font-weight: 700; }
+.svc-duration { font-size: 0.8rem; color: #aaa; }
+.cat-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--pink-dark);
+    background: var(--pink-lightest);
+    border: 1px solid var(--pink-border);
+    border-radius: 10px;
+    padding: 0.15rem 0.6rem;
+    margin-bottom: 0.4rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-scissors me-2" style="color:var(--pink-primary);"></i>Наши услуги</h1>
+        <p class="text-muted mb-0">Широкий выбор профессиональных услуг красоты</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- Category filter chips -->
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid var(--pink-border);">
+        <a href="/services/" class="filter-chip {% if not selected_category %}active{% endif %}">Все</a>
+        {% for cat_key, cat_label in categories %}
+        <a href="/services/?category={{ cat_key }}"
+           class="filter-chip {% if selected_category == cat_key %}active{% endif %}">
+            {{ cat_label }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if services %}
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-sm-6 col-md-4">
+            <div class="svc-card">
+                <!-- Photo -->
+                {% if service.photo %}
+                <img src="{{ service.photo.url }}" alt="{{ service.name }}" class="svc-photo">
+                {% else %}
+                <div class="svc-photo-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 16 16" fill="currentColor"><path d="M6.002 5.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M2.002 1a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V3a2 2 0 00-2-2h-12zm12 1a1 1 0 011 1v6.5l-3.777-1.947a.5.5 0 00-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 00-.63.062L1.002 12V3a1 1 0 011-1h12z"/></svg>
+                </div>
+                {% endif %}
+
+                <!-- Body -->
+                <div class="svc-body">
+                    <div class="cat-badge">{{ service.get_category_display }}</div>
+                    <div class="svc-name">{{ service.name }}</div>
+                    {% if service.description %}
+                    <div class="svc-desc">{{ service.description }}</div>
+                    {% else %}
+                    <div class="svc-desc"></div>
+                    {% endif %}
+                </div>
+
+                <!-- Footer -->
+                <div class="svc-footer">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="svc-price">{{ service.price }} ₽</span>
+                        <span class="svc-duration"><i class="bi bi-clock me-1"></i>{{ service.duration_minutes }} мин</span>
+                    </div>
+                    <a href="/bookings/book/?service={{ service.pk }}" class="btn btn-pink w-100 btn-sm">
+                        <i class="bi bi-calendar-plus me-1"></i>Записаться
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div style="color:var(--pink-primary);opacity:0.25;margin-bottom:1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 3.5c-.614-.884-.074-1.962.858-2.5L8 7.226 11.642 1c.932.538 1.472 1.616.858 2.5L8.81 8.61l1.556 2.661a2.5 2.5 0 11-.794.637L8 9.71l-1.572 2.2a2.5 2.5 0 11-.794-.637L7.19 8.61 3.5 3.5z"/></svg>
+        </div>
+        <h5 class="text-muted">Услуги в этой категории не найдены</h5>
+        <a href="/services/" class="btn btn-pink-outline mt-2">Показать все</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

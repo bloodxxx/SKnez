@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация — Студия красоты «Нежность»{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div style="color: var(--pink-primary);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <h2 style="color: var(--pink-dark);">Регистрация</h2>
+                    <p class="text-muted">Создайте аккаунт для онлайн-записи</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in field.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                        <div class="form-text text-muted small">{{ field.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-pink btn-lg">
+                            <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="divider-pink mt-4">
+                <p class="text-center mb-0">
+                    Уже есть аккаунт? <a href="/login/" style="color: var(--pink-primary);">Войти</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

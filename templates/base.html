@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Студия красоты «Нежность»{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        :root {
+            --pink-lightest: #fff0f5;
+            --pink-light: #ffb6c1;
+            --pink-medium: #ff69b4;
+            --pink-primary: #e91e8c;
+            --pink-dark: #c71585;
+            --pink-card: #fff8fa;
+            --pink-accent: #f48fb1;
+            --pink-border: #fce4ec;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--pink-lightest);
+            font-family: 'Lato', sans-serif;
+            color: #4a4a4a;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, .display-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 2px solid var(--pink-border);
+            box-shadow: 0 2px 12px rgba(233, 30, 140, 0.08);
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--pink-dark) !important;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-brand span {
+            color: var(--pink-primary);
+        }
+
+        .nav-link {
+            color: #5a5a5a !important;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.5rem 0.9rem !important;
+            border-radius: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--pink-primary) !important;
+            background: var(--pink-lightest);
+        }
+
+        .nav-link.active {
+            color: var(--pink-primary) !important;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn-pink {
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(233, 30, 140, 0.3);
+        }
+
+        .btn-pink:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(233, 30, 140, 0.4);
+            color: #fff;
+            background: linear-gradient(135deg, var(--pink-dark), #9c1070);
+        }
+
+        .btn-pink-outline {
+            border: 2px solid var(--pink-primary);
+            color: var(--pink-primary);
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-pink-outline:hover {
+            background: var(--pink-primary);
+            color: #fff;
+        }
+
+        .btn-sm.btn-pink {
+            padding: 0.35rem 1rem;
+            font-size: 0.85rem;
+            box-shadow: none;
+        }
+
+        /* Cards */
+        .card {
+            border: 1px solid var(--pink-border);
+            border-radius: 16px;
+            background: var(--pink-card);
+            box-shadow: 0 2px 12px rgba(233, 30, 140, 0.05);
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 24px rgba(233, 30, 140, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--pink-lightest), #fce4ec);
+            border-bottom: 1px solid var(--pink-border);
+            border-radius: 16px 16px 0 0 !important;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--pink-dark);
+        }
+
+        /* Page header */
+        .page-header {
+            background: linear-gradient(135deg, #fff0f5 0%, #fce4ec 50%, #f8bbd0 100%);
+            border-bottom: 1px solid var(--pink-border);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: var(--pink-dark);
+            font-size: 2.2rem;
+        }
+
+        /* Stats cards */
+        .stat-card {
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .stat-card-pink {
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+        }
+
+        .stat-card-rose {
+            background: linear-gradient(135deg, #f06292, #e91e63);
+        }
+
+        .stat-card-light {
+            background: linear-gradient(135deg, #f48fb1, #f06292);
+        }
+
+        .stat-card-warm {
+            background: linear-gradient(135deg, #ce93d8, #ab47bc);
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.3;
+            position: absolute;
+            right: 1.5rem;
+            top: 1rem;
+        }
+
+        /* Tables */
+        .table th {
+            background: linear-gradient(135deg, var(--pink-lightest), #fce4ec);
+            color: var(--pink-dark);
+            font-weight: 700;
+            border-color: var(--pink-border);
+            white-space: nowrap;
+        }
+
+        .table td {
+            border-color: var(--pink-border);
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #fff5f8;
+        }
+
+        /* Badges */
+        .badge-status-pending { background: #fff3cd; color: #856404; }
+        .badge-status-confirmed { background: #d1e7dd; color: #0f5132; }
+        .badge-status-arrived { background: #cff4fc; color: #055160; }
+        .badge-status-completed { background: #d1e7dd; color: #0f5132; }
+        .badge-status-cancelled { background: #f8d7da; color: #842029; }
+        .badge-status-no_show { background: #e2e3e5; color: #41464b; }
+
+        .badge-complaint-new { background: #f8d7da; color: #842029; }
+        .badge-complaint-in_progress { background: #fff3cd; color: #856404; }
+        .badge-complaint-closed { background: #d1e7dd; color: #0f5132; }
+
+        /* Forms */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--pink-accent);
+            box-shadow: 0 0 0 0.2rem rgba(233, 30, 140, 0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--pink-dark);
+        }
+
+        /* Hero section */
+        .hero {
+            background: linear-gradient(135deg, #fff0f5 0%, #fce4ec 40%, #f8bbd0 100%);
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(233,30,140,0.06) 0%, rgba(244,143,177,0.04) 60%, transparent 100%);
+            right: 3%;
+            top: -2rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--pink-dark);
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #7a4060;
+        }
+
+        /* Service card */
+        .service-card {
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .service-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--pink-primary);
+            font-weight: 700;
+        }
+
+        .service-duration {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* Master card */
+        .master-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: top center;
+            border: 4px solid var(--pink-light);
+        }
+
+        .master-avatar-placeholder {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink-light), var(--pink-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: white;
+            border: 4px solid var(--pink-light);
+            margin: 0 auto;
+        }
+
+        /* Timeline / booking list */
+        .booking-item {
+            border-left: 4px solid var(--pink-light);
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 0 8px 8px 0;
+            transition: border-color 0.2s;
+        }
+
+        .booking-item:hover {
+            border-left-color: var(--pink-primary);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #3d0020, #5c0033);
+            color: #f8bbd0;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: var(--pink-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        /* Alerts */
+        .alert-pink {
+            background: #fce4ec;
+            border: 1px solid var(--pink-border);
+            color: var(--pink-dark);
+            border-radius: 10px;
+        }
+
+        /* Sidebar nav for admin */
+        .admin-sidebar {
+            background: white;
+            border-right: 1px solid var(--pink-border);
+            min-height: calc(100vh - 72px);
+            padding: 1.5rem 0;
+        }
+
+        .admin-sidebar .nav-link {
+            padding: 0.6rem 1.5rem !important;
+            border-radius: 0 !important;
+            border-left: 3px solid transparent;
+        }
+
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            border-left-color: var(--pink-primary);
+            background: var(--pink-lightest);
+        }
+
+        .admin-sidebar .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            padding: 0.5rem 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Slot buttons */
+        .slot-btn {
+            border: 2px solid var(--pink-accent);
+            background: white;
+            color: var(--pink-dark);
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0.25rem;
+        }
+
+        .slot-btn:hover,
+        .slot-btn.selected {
+            background: var(--pink-primary);
+            border-color: var(--pink-primary);
+            color: white;
+        }
+
+        /* Overdue indicator */
+        .overdue-indicator {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .stat-card .stat-number { font-size: 1.8rem; }
+            .admin-sidebar { min-height: auto; }
+        }
+
+        .divider-pink {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--pink-accent), transparent);
+            margin: 2rem 0;
+        }
+
+        /* Защита от застрявших Bootstrap-оверлеев */
+        body:not(.modal-open) {
+            overflow-y: auto !important;
+            padding-right: 0 !important;
+        }
+        body:not(.modal-open) .modal-backdrop,
+        body:not(.modal-open) .offcanvas-backdrop {
+            display: none !important;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-flower1 me-1" style="color: var(--pink-primary);"></i>
+                Студия красоты <span>«Нежность»</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/services/">
+                            Услуги
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/masters/">
+                            Мастера
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/bookings/book/">
+                            Записаться
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            Управление
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/bookings/admin/today/"><i class="bi bi-calendar-day me-2"></i>Сегодня</a></li>
+                            <li><a class="dropdown-item" href="/bookings/admin/list/"><i class="bi bi-list-ul me-2"></i>Все записи</a></li>
+                            <li><a class="dropdown-item" href="/schedule/"><i class="bi bi-calendar-week me-2"></i>Расписание</a></li>
+                            <li><a class="dropdown-item" href="/complaints/admin/list/"><i class="bi bi-chat-square-text me-2"></i>Жалобы</a></li>
+                            <li><a class="dropdown-item" href="/payments/"><i class="bi bi-credit-card me-2"></i>Платежи</a></li>
+                            {% if user.is_superuser %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/dashboard/kpi/"><i class="bi bi-graph-up me-2"></i>KPI Дашборд</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1" style="color: var(--pink-primary);"></i>
+                            {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile/"><i class="bi bi-person me-2"></i>Мой профиль</a></li>
+                            <li><a class="dropdown-item" href="/complaints/submit/"><i class="bi bi-chat-left-text me-2"></i>Подать жалобу</a></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="/admin/"><i class="bi bi-shield-lock me-2"></i>Панель Django</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout/"><i class="bi bi-box-arrow-right me-2"></i>Выйти</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login/">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2 d-flex align-items-center">
+                        <a class="btn btn-pink btn-sm" href="/register/">Регистрация</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {% if message.tags == 'success' %}<i class="bi bi-check-circle me-2"></i>{% endif %}
+            {% if message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-exclamation-triangle me-2"></i>{% endif %}
+            {% if message.tags == 'warning' %}<i class="bi bi-exclamation-circle me-2"></i>{% endif %}
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-white" style="font-family: 'Playfair Display', serif;">
+                        <i class="bi bi-flower1 me-1"></i>Студия красоты «Нежность»
+                    </h5>
+                    <p class="small">Ваша красота — наша забота. Профессиональные услуги красоты в уютной атмосфере.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white">Услуги</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="/services/">Все услуги</a></li>
+                        <li><a href="/masters/">Наши мастера</a></li>
+                        <li><a href="/bookings/book/">Онлайн запись</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white">Контакты</h6>
+                    <p class="small mb-1"><i class="bi bi-telephone me-1"></i>+7 (495) 123-45-67</p>
+                    <p class="small mb-1"><i class="bi bi-envelope me-1"></i>info@nezhnost-salon.ru</p>
+                    <p class="small"><i class="bi bi-geo-alt me-1"></i>Ижевск, ул. Красоты, 1</p>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center small">
+                <p class="mb-0">&copy; 2026 Студия красоты «Нежность»</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(function (el) {
+            el.remove();
+        });
+        document.body.classList.remove('modal-open', 'overflow-hidden');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+
+        var nav = document.getElementById('navbarMain');
+        if (nav && nav.classList.contains('show')) {
+            var bsCollapse = bootstrap.Collapse.getInstance(nav);
+            if (bsCollapse) bsCollapse.hide();
+            else nav.classList.remove('show');
+        }
+    });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

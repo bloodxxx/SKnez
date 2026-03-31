@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Жалоба #{{ complaint.pk }} — Панель управления{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-chat-square-text me-2" style="color: var(--pink-primary);"></i>
+                    Жалоба #{{ complaint.pk }}
+                </h1>
+                <p class="text-muted mb-0">
+                    <span class="badge badge-complaint-{{ complaint.status }} rounded-pill">
+                        {{ complaint.get_status_display }}
+                    </span>
+                    {% if complaint.is_overdue %}
+                    <span class="badge overdue-indicator ms-2" style="background: #f8d7da; color: #842029;">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Просрочена
+                    </span>
+                    {% endif %}
+                </p>
+            </div>
+            <a href="/complaints/admin/list/" class="btn btn-pink-outline">
+                <i class="bi bi-arrow-left me-1"></i>К списку
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- Complaint Info -->
+        <div class="col-lg-5">
+            <div class="card p-4 mb-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+                    <i class="bi bi-person me-1"></i>Клиент
+                </h6>
+                <p class="mb-1"><strong>{{ complaint.client.full_name }}</strong></p>
+                <p class="mb-1 text-muted small"><i class="bi bi-phone me-1"></i>{{ complaint.client.phone }}</p>
+                {% if complaint.client.email %}
+                <p class="mb-0 text-muted small"><i class="bi bi-envelope me-1"></i>{{ complaint.client.email }}</p>
+                {% endif %}
+            </div>
+
+            {% if complaint.booking %}
+            <div class="card p-4 mb-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+                    <i class="bi bi-calendar3 me-1"></i>Связанная запись
+                </h6>
+                <p class="mb-1"><strong>{{ complaint.booking.service.name }}</strong></p>
+                <p class="mb-1 text-muted small">Мастер: {{ complaint.booking.master.full_name }}</p>
+                <p class="mb-1 text-muted small">Дата: {{ complaint.booking.date|date:"d.m.Y" }}</p>
+                <p class="mb-0 text-muted small">
+                    <span class="badge badge-status-{{ complaint.booking.status }}">{{ complaint.booking.get_status_display }}</span>
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="card p-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+                    <i class="bi bi-clock me-1"></i>Временные метки
+                </h6>
+                <p class="mb-1 small">Подана: <strong>{{ complaint.created_at|date:"d.m.Y H:i" }}</strong></p>
+                {% if complaint.closed_at %}
+                <p class="mb-1 small">Закрыта: <strong>{{ complaint.closed_at|date:"d.m.Y H:i" }}</strong></p>
+                {% endif %}
+                {% if complaint.handled_by %}
+                <p class="mb-0 small">Обработал: <strong>{{ complaint.handled_by }}</strong></p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Complaint Text & Resolution -->
+        <div class="col-lg-7">
+            <div class="card p-4 mb-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+                    <i class="bi bi-chat-left-text me-1"></i>Текст жалобы
+                </h6>
+                <div class="p-3 rounded" style="background: var(--pink-lightest); border: 1px solid var(--pink-border);">
+                    {{ complaint.text|linebreaks }}
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+                    <i class="bi bi-pencil me-1"></i>Обработка жалобы
+                </h6>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-pink">
+                            <i class="bi bi-check-lg me-2"></i>Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

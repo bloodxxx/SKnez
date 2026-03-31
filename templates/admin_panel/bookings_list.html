@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Все записи — Панель управления{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="bi bi-list-ul me-2" style="color: var(--pink-primary);"></i>Все записи</h1>
+                <p class="text-muted mb-0">Управление записями клиентов</p>
+            </div>
+            <a href="/bookings/admin/today/" class="btn btn-pink">
+                <i class="bi bi-calendar-day me-1"></i>Сегодня
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Filters -->
+    <div class="card mb-4 p-4">
+        <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">
+            <i class="bi bi-funnel me-1"></i>Фильтры
+        </h6>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все статусы</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Мастер</label>
+                <select name="master" class="form-select">
+                    <option value="">Все мастера</option>
+                    {% for master in masters %}
+                    <option value="{{ master.pk }}" {% if selected_master == master.pk|stringformat:'s' %}selected{% endif %}>
+                        {{ master.full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Дата с</label>
+                <input type="date" name="date_from" class="form-control" value="{{ date_from|default:'' }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Дата по</label>
+                <input type="date" name="date_to" class="form-control" value="{{ date_to|default:'' }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-pink flex-grow-1">Применить</button>
+                <a href="/bookings/admin/list/" class="btn btn-pink-outline"><i class="bi bi-x-lg"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bookings table -->
+    <div class="card">
+        <div class="card-header p-4 d-flex justify-content-between">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Список записей</h5>
+            <span class="badge" style="background: var(--pink-primary);">{{ bookings|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Дата</th>
+                            <th>Клиент</th>
+                            <th>Мастер</th>
+                            <th>Услуга</th>
+                            <th>Время</th>
+                            <th>Статус</th>
+                            <th>Оплата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td class="ps-4 text-muted small">{{ booking.pk }}</td>
+                            <td>
+                                <strong>{{ booking.date|date:"d.m.Y" }}</strong>
+                            </td>
+                            <td>
+                                {% if booking.client %}
+                                <div class="fw-bold">{{ booking.client.full_name }}</div>
+                                <div class="small text-muted">{{ booking.client.phone }}</div>
+                                {% else %}
+                                <div class="fw-bold">{{ booking.guest_name }}</div>
+                                <div class="small text-muted">{{ booking.guest_phone }}</div>
+                                <span class="badge rounded-pill" style="background:#fce4ec;color:#c71585;font-size:0.7rem;">Гость</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ booking.master.full_name }}</td>
+                            <td>
+                                <div>{{ booking.service.name }}</div>
+                                <div class="small text-muted">{{ booking.service.price }} ₽</div>
+                            </td>
+                            <td>{{ booking.start_time|time:"H:i" }}–{{ booking.end_time|time:"H:i" }}</td>
+                            <td>
+                                <span class="badge badge-status-{{ booking.status }} rounded-pill">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if booking.payment %}
+                                <span class="badge" style="background: #d1e7dd; color: #0f5132;">
+                                    {{ booking.payment.amount }} ₽
+                                </span>
+                                {% elif booking.status == 'completed' %}
+                                <a href="/payments/create/{{ booking.pk }}/" class="btn btn-sm btn-pink">
+                                    Добавить
+                                </a>
+                                {% else %}
+                                <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="/bookings/admin/{{ booking.pk }}/status/">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                                        {% for value, label in booking.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if booking.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div style="font-size: 4rem; opacity: 0.3; color: var(--pink-primary);"><i class="bi bi-clipboard"></i></div>
+                <h5 class="text-muted mt-3">Записей не найдено</h5>
+                <p class="text-muted">Попробуйте изменить фильтры</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

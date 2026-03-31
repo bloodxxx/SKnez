@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Платежи — Панель управления{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-credit-card me-2" style="color: var(--pink-primary);"></i>Платежи</h1>
+        <p class="text-muted mb-0">История оплат</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="card">
+        <div class="card-body p-0">
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Клиент</th>
+                            <th>Услуга</th>
+                            <th>Мастер</th>
+                            <th>Сумма</th>
+                            <th>Способ</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td class="ps-4 text-muted small">{{ payment.pk }}</td>
+                            <td>
+                                <strong>{{ payment.booking.client.full_name }}</strong>
+                                <div class="small text-muted">{{ payment.booking.client.phone }}</div>
+                            </td>
+                            <td>{{ payment.booking.service.name }}</td>
+                            <td>{{ payment.booking.master.full_name }}</td>
+                            <td>
+                                <strong style="color: var(--pink-primary);">{{ payment.amount }} ₽</strong>
+                            </td>
+                            <td>
+                                {% if payment.method == 'cash' %}
+                                <span class="badge" style="background: #d1e7dd; color: #0f5132;">
+                                    <i class="bi bi-cash me-1"></i>Наличные
+                                </span>
+                                {% else %}
+                                <span class="badge" style="background: #cff4fc; color: #055160;">
+                                    <i class="bi bi-credit-card me-1"></i>Безналичный
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ payment.paid_at|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div style="font-size: 4rem; opacity: 0.3; color: var(--pink-primary);"><i class="bi bi-credit-card"></i></div>
+                <h5 class="text-muted mt-3">Платежей нет</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

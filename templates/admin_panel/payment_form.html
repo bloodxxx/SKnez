@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить оплату — Студия красоты «Нежность»{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-credit-card me-2" style="color: var(--pink-primary);"></i>Регистрация оплаты</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 mb-4">
+                <h6 class="fw-bold mb-3" style="color: var(--pink-dark);">Данные записи</h6>
+                <p><strong>Клиент:</strong> {{ booking.client.full_name }}</p>
+                <p><strong>Мастер:</strong> {{ booking.master.full_name }}</p>
+                <p><strong>Услуга:</strong> {{ booking.service.name }}</p>
+                <p><strong>Дата:</strong> {{ booking.date|date:"d.m.Y" }}</p>
+                <p class="mb-0"><strong>Стоимость:</strong> {{ booking.service.price }} ₽</p>
+            </div>
+
+            <div class="card p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Сумма (₽) <span class="text-danger">*</span></label>
+                        <input type="number" name="amount" class="form-control" step="0.01"
+                               value="{{ booking.service.price }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Способ оплаты <span class="text-danger">*</span></label>
+                        <select name="method" class="form-select" required>
+                            {% for value, label in method_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Примечание</label>
+                        <textarea name="notes" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-pink flex-grow-1">
+                            <i class="bi bi-check-lg me-1"></i>Зарегистрировать оплату
+                        </button>
+                        <a href="/bookings/admin/list/" class="btn btn-pink-outline">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
